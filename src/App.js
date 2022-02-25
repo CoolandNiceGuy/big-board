@@ -1,29 +1,38 @@
-import logo from './logo.svg';
 import './App.css';
 import { TextField, Button } from '@mui/material';
 import React from 'react';
 import { scrape } from '../node_modules/espn-box-score-scraper/app'; 
 import Icon from '@mui/material/Icon';
 import { PlayerCard } from './PlayerCard';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { IconButton } from '@mui/material';
+import { v4 as uuidv4 } from 'uuid';
 
 const App = () =>  {
 
   const [options, setOptions] = React.useState([]);
-  const [players, setPlayers] = React.useState([]);
   const [playerCards, setPlayerCards] = React.useState([]);
 
   const  urlChange = async (text) => {
     let output = await scrape(text);
-    setPlayers(output);
     setOptions(Object.keys(output));
   }
 
   const addCard = () => {
-    setPlayerCards([...playerCards, true]);
+    const unique_id = uuidv4();
+    const obj = {id: unique_id};
+    setPlayerCards([...playerCards, obj]);
   }
 
-  const deleteCard = (index) => {
-    setPlayerCards(playerCards.splice(index, 1));
+  const deleteCard = async (id) => {
+    //fence post
+    if(playerCards.length === 1){
+      setPlayerCards([]);
+    }
+    else{
+      let arr = playerCards.filter((item) => item.id !== id);
+      setPlayerCards(...[arr]);
+    }
   }
 
   return (
@@ -46,7 +55,16 @@ const App = () =>  {
         Add Card
       </Button>
 
-      {playerCards.map((item, index) => (<PlayerCard title={item} options={options} key={index}></PlayerCard> ))}
+      {playerCards.map((element) => (
+      <PlayerCard options={options} key={element.id}>
+        <IconButton aria-label="delete" onClick={() => {deleteCard(element.id)}}>
+            <DeleteIcon />
+         </IconButton>
+      </PlayerCard> 
+      ))}
+
+      {/* <PlayerCard title={"Test"} options={options} key={10}>
+      </PlayerCard> */}
 
       </header>
     </div>
