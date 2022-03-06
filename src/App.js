@@ -1,21 +1,25 @@
 import './App.css';
-import { TextField, Button } from '@mui/material';
+import { TextField } from '@mui/material';
 import React from 'react';
 import { scrape } from '../node_modules/espn-box-score-scraper/app'; 
-import Icon from '@mui/material/Icon';
 import { PlayerCard } from './PlayerCard';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { IconButton } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { IconButton, Grid, Fab } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
 
+
+const FIELDS = ['td', 'rec', 'yds', 'rec_yards', 'rush_yards']
 const App = () =>  {
 
   const [options, setOptions] = React.useState([]);
   const [playerCards, setPlayerCards] = React.useState([]);
+  const [data, setData] = React.useState([]);
 
   const  urlChange = async (text) => {
-    let output = await scrape(text);
+    let output = await scrape(text, FIELDS);
     setOptions(Object.keys(output));
+    setData(output);
   }
 
   const addCard = () => {
@@ -41,7 +45,6 @@ const App = () =>  {
         rel="stylesheet"
         href="https://fonts.googleapis.com/icon?family=Material+Icons"
       />
-      <header className="App-header">
 
         {/* only for debugging purposes */}
         <TextField 
@@ -51,22 +54,18 @@ const App = () =>  {
         onChange={ (event) => urlChange(event.target.value)}
         />
 
-      <Button variant="outlined" endIcon={<Icon color="primary">add_circle</Icon>} onClick={() => {addCard()}}>
-        Add Card
-      </Button>
-
-      {playerCards.map((element) => (
-      <PlayerCard options={options} key={element.id}>
+      <Grid container spacing={2} sx={{flexGrow: '1'}}>
+      {playerCards.map((element, index) => (
+      <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={element.id}>
+      <PlayerCard options={options} key={element.id} playerStats={data} className="playerCard">
         <IconButton aria-label="delete" onClick={() => {deleteCard(element.id)}}>
             <DeleteIcon />
          </IconButton>
       </PlayerCard> 
+      </Grid>
       ))}
-
-      {/* <PlayerCard title={"Test"} options={options} key={10}>
-      </PlayerCard> */}
-
-      </header>
+      </Grid>
+    <Fab color="primary" onClick={() => {addCard()}} sx={{position: 'absolute', bottom: '0', right: '0'}}><AddIcon/></Fab>
     </div>
   );
 }
