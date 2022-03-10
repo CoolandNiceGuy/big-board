@@ -41,3 +41,8 @@ html, body {
   margin: 0;
   height: 100%;
 }
+
+.team_mascot {
+  width: 30% !important;
+  height: 30%;
+}

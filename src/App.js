@@ -1,13 +1,12 @@
 import './App.css';
 import { TextField } from '@mui/material';
 import React from 'react';
-import { scrape } from '../node_modules/espn-box-score-scraper/app'; 
+import { scrape, getGameInfo } from '../node_modules/espn-box-score-scraper/app'; 
 import { PlayerCard } from './PlayerCard';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { IconButton, Grid, Fab } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
-
 
 const FIELDS = ['td', 'rec', 'yds', 'rec_yards', 'rush_yards']
 const App = () =>  {
@@ -18,7 +17,22 @@ const App = () =>  {
 
   const  urlChange = async (text) => {
     let output = await scrape(text, FIELDS);
-    setOptions(Object.keys(output));
+    
+
+    //append false 'isGame' key to all player objects
+    let keys = Object.keys(output);
+    for(let i = 0; i < keys.length; i++){
+      output[keys[i]].isGame = false;
+    }
+
+    const game = await getGameInfo(text);
+    
+    game.isGame = true;
+
+    let gameTitle = game[0].name + " Vs. " + game[1].name
+    output[gameTitle] = game;
+
+    setOptions([...Object.keys(output)]);
     setData(output);
   }
 
@@ -54,11 +68,11 @@ const App = () =>  {
         onChange={ (event) => urlChange(event.target.value)}
         />
 
-      <Grid container spacing={2} sx={{flexGrow: '1'}}>
+      <Grid container spacing={2} sx={{flexGrow: '1'}} justifyContent="center">
       {playerCards.map((element, index) => (
-      <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={element.id}>
+      <Grid item xs={8} sm={6} md={6} lg={4} xl={3} key={element.id}>
       <PlayerCard options={options} key={element.id} playerStats={data} className="playerCard">
-        <IconButton aria-label="delete" onClick={() => {deleteCard(element.id)}}>
+        <IconButton aria-label="delete" sx={{}} onClick={() => {deleteCard(element.id)}}>
             <DeleteIcon />
          </IconButton>
       </PlayerCard> 
